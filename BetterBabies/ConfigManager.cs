@@ -24,7 +24,6 @@ namespace BetterBabies
 
         public ConfigEntry<bool> disableAgentOnSell;
 
-
         public ConfigManager(BaseUnityPlugin owner)
         {
             Owner = owner;
@@ -37,7 +36,7 @@ namespace BetterBabies
             CanBabyGoOutside = Owner.Config.Bind("General",
                 "CanBabyGoOutside",
                 true,
-                "Can the baby go outside without indefinitly crying?");
+                "Can the baby go outside without crying?");
 
             CanBabyGoIntoOrbit = Owner.Config.Bind("General",
                 "CanBabyGoIntoOrbit",

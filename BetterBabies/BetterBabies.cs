@@ -11,6 +11,7 @@ using UnityEngine.ProBuilder;
 namespace BetterBabies
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+    [BepInDependency("dev.kittenji.NavMeshInCompany", BepInDependency.DependencyFlags.HardDependency)]
     public class BetterBabies : BaseUnityPlugin
     {
         public static BetterBabies Instance { get; private set; } = null!;
