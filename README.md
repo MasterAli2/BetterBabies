@@ -29,6 +29,7 @@ It is not recemended to make the baby cry while in orbit as it may cause issues.
 
 ## Dependencies
 - [NavMeshInCompany](https://thunderstore.io/c/lethal-company/p/Kittenji/NavMeshInCompany/)
+- [CSync](https://thunderstore.io/c/lethal-company/p/Sigurd/CSync/)
 
 ## Know Issues
 

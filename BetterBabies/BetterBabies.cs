@@ -3,22 +3,28 @@ using BepInEx.Logging;
 using BetterBabies.Patches;
 using GameNetcodeStuff;
 using HarmonyLib;
+using System;
 using System.Collections.Generic;
-using System.Reflection;
-using UnityEngine;
-using UnityEngine.ProBuilder;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+
+
 
 namespace BetterBabies
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     [BepInDependency("dev.kittenji.NavMeshInCompany", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.sigurd.csync", "5.0.1")]
     public class BetterBabies : BaseUnityPlugin
     {
         public static BetterBabies Instance { get; private set; } = null!;
         internal new static ManualLogSource Logger { get; private set; } = null!;
         internal static Harmony? Harmony { get; set; }
 
-        internal ConfigManager config;
+        internal static ConfigManager config;
+
+        static List<CodeInstruction> _1x00;
 
         public const int babyItemId = 123984;
 
@@ -32,7 +38,7 @@ namespace BetterBabies
             Logger = base.Logger;
             Instance = this;
 
-            config = new ConfigManager(this);
+            config = new ConfigManager(base.Config);
 
             Patch();
 
@@ -45,12 +51,12 @@ namespace BetterBabies
 
             Logger.LogDebug("Patching...");
 
+            Harmony.PatchAll(typeof(BetterBabies));
+
             Harmony.PatchAll(typeof(BabyOutside));
 
-            if (Instance.config.CanBabyGoIntoOrbit.Value)
-            {
-                Harmony.PatchAll(typeof(BabyLeave));
-            }
+            Harmony.PatchAll(typeof(BabyLeave));
+
             Harmony.PatchAll(typeof(BabyGeneral));
             Harmony.PatchAll(typeof(BabySell));
 
@@ -95,7 +101,65 @@ namespace BetterBabies
         
         public static void setBabyPrice(CaveDwellerPhysicsProp __)
         {
-            __.scrapValue = Random.Range(Instance.config.BabyPriceMinInclusive.Value, Instance.config.BabyPriceMaxExclusive.Value);
+            System.Random random = new System.Random(StartOfRound.Instance.randomMapSeed);
+
+            __.scrapValue = random.Next(random.Next(ConfigManager.BabyPriceMinInclusive.Value, ConfigManager.BabyPriceMaxExclusive.Value));
         }
+
+        [HarmonyPatch(typeof(BetterBabies), nameof(BetterBabies.aaa))]
+        [HarmonyTranspiler]
+        static IEnumerable<CodeInstruction> aaa_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            _1x00 = instructions.ToList();
+            foreach(var instruction in instructions)
+            {
+                yield return instruction;
+                if (instruction.opcode == OpCodes.Stloc_3) 
+                {
+                    _1x00.Remove(instruction);
+                    break;
+                }
+
+                _1x00.Remove(instruction);
+            }
+            
+            foreach (var _ in _1x00)
+            {
+                Logger.LogMessage(_);
+            }
+        }
+
+        [HarmonyPatch(typeof(BetterBabies), nameof(BetterBabies.aaa))]
+        [HarmonyFinalizer]
+        static Exception aaa_Finalizer() { return null; }
+
+        [MethodImpl(MethodImplOptions.NoOptimization)]
+        public static void aaa()
+        {
+            bool _1 = false;
+            EnemyAI[] array = null;
+            bool _2 = false;
+            int i = 0;
+
+            if (array[i].GetType() == typeof(CaveDwellerAI))
+            {
+                CaveDwellerAI _ = (CaveDwellerAI)array[i];
+                BetterBabies.Logger.LogDebug($"Found a wild baby!");
+
+                if (_.propScript.isHeld && _.propScript.playerHeldBy.isInHangarShipRoom)
+                {
+                    BetterBabies.Logger.LogDebug($"Kidnaping the wild baby!");
+
+                    BetterBabies.Instance.babiesInShip.Add(_);
+                    
+                    BetterBabies.Instance.babyItemsInShip.Add(_.propScript);
+
+                    aab();
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoOptimization)]
+        public static void aab() { }
     }
 }

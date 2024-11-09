@@ -21,13 +21,18 @@ namespace BetterBabies.Patches
         [HarmonyPrefix]
         static void BabyUpdateIsLeavingPrefix()
         {
+            if (!ConfigManager.CanBabyGoIntoOrbit.Value) return;
+
             wasLeaving = StartOfRound.Instance.shipIsLeaving;
             StartOfRound.Instance.shipIsLeaving = false;
         }
+
         [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.BabyUpdate))]
         [HarmonyPostfix]
         static void BabyUpdateIsLeavingPostfix()
         {
+            if (!ConfigManager.CanBabyGoIntoOrbit.Value) return;
+
             StartOfRound.Instance.shipIsLeaving = wasLeaving;
             wasLeaving = false;
         }
@@ -41,6 +46,8 @@ namespace BetterBabies.Patches
         [HarmonyPrefix]
         static bool DontDespawnBaby(RoundManager __instance)
         {
+            if (!ConfigManager.CanBabyGoIntoOrbit.Value) return true;
+
             if (!__instance.IsServer)
             {
                 return false;
@@ -104,6 +111,8 @@ namespace BetterBabies.Patches
         [HarmonyPrefix]
         static void RespawnBaby(StartOfRound __instance)
         {
+            if (!ConfigManager.CanBabyGoIntoOrbit.Value) return;
+
             if (!__instance.IsServer && !__instance.inShipPhase) return;
 
             foreach (CaveDwellerAI baby in BetterBabies.Instance.babiesInShip.ToList())
@@ -113,6 +122,7 @@ namespace BetterBabies.Patches
                 baby.SetCryingLocalClient(false);
                 baby.SetBabyCryingServerRpc(false);
                 baby.growthMeter = 0f;
+                baby.nearTransforming = false;
 
                 BetterBabies.Instance.babiesInShip.Remove(baby);
             }
@@ -131,6 +141,8 @@ namespace BetterBabies.Patches
         [HarmonyPrefix]
         static bool disableBabyGrowth(CaveDwellerAI __instance)
         {
+            if (!ConfigManager.CanBabyGoIntoOrbit.Value) return true;
+
             if (BetterBabies.babyInShipState(__instance))
             {
                 if (__instance.growthMeter == 0 || !__instance.babyCrying) return true;

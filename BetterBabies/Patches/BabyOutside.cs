@@ -16,27 +16,26 @@ namespace BetterBabies.Patches
 
         [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.BabyUpdate))]
         [HarmonyTranspiler]
+        [HarmonyDebug]
         static IEnumerable<CodeInstruction> BabyOutsideTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
-            if (!BetterBabies.Instance.config.CanBabyGoOutside.Value)
-            {
-                foreach(var _ in instructions)
-                {
-                    yield return _;
-                }
-                yield break;
-            }
 
-            var targetField = AccessTools.Field(typeof(EnemyAI), "isOutside");
+            Label configJumpLabel = il.DefineLabel();
+
+            var isOutside = AccessTools.Field(typeof(EnemyAI), "isOutside");
+
+            var config = AccessTools.Field(typeof(ConfigManager), "CanBabyGoOutside");
+            //var configValueObj = AccessTools.Field(typeof(BepInEx.Configuration.ConfigEntry<bool>), "Value");
+            var configValue = AccessTools.Property(typeof(CSync.Lib.SyncedEntry<bool>), "Value");
 
             var foundFirst = false;
             var foundTarget = false;
 
-            var localIsOutside = il.DeclareLocal(typeof(bool));
+            var wasOutside = il.DeclareLocal(typeof(bool));
 
             foreach (var instruction in instructions)
             {
-                if (instruction.opcode == OpCodes.Ldfld && instruction.operand as FieldInfo == targetField)
+                if (instruction.opcode == OpCodes.Ldfld && instruction.operand as FieldInfo == isOutside)
                 {
                     if (foundTarget)
                     {
@@ -55,10 +54,15 @@ namespace BetterBabies.Patches
                         // bool localIsOutside = isOutside
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
 
-                        yield return new CodeInstruction(OpCodes.Ldfld, targetField);
+                        yield return new CodeInstruction(OpCodes.Ldfld, isOutside);
 
-                        yield return new CodeInstruction(OpCodes.Stloc, localIsOutside);
+                        yield return new CodeInstruction(OpCodes.Stloc, wasOutside);
 
+                        // if (!ConfigManager.CanBabyGoOutside) goto jumpIfFalse;
+                        yield return new CodeInstruction(OpCodes.Ldsfld, config);
+                        yield return new CodeInstruction(OpCodes.Callvirt, configValue.GetGetMethod());
+
+                        yield return new CodeInstruction(OpCodes.Brfalse, configJumpLabel);
 
 
                         // isOutside = false
@@ -66,24 +70,27 @@ namespace BetterBabies.Patches
 
                         yield return new CodeInstruction(OpCodes.Ldc_I4_0);
 
-                        yield return new CodeInstruction(OpCodes.Stfld, targetField);
+                        yield return new CodeInstruction(OpCodes.Stfld, isOutside);
 
 
-
+                        // jumpIfFalse:
                         // if (isOutside && !isInsidePlayerShip && !babyCrying)
-                        yield return instruction;
+                        var _ = instruction.Clone();
+                        _.labels.Add(configJumpLabel);
+                        yield return _;
 
                         // isOutside = localIsOutside
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
 
-                        yield return new CodeInstruction(OpCodes.Ldloc, localIsOutside);
+                        yield return new CodeInstruction(OpCodes.Ldloc, wasOutside);
 
-                        yield return new CodeInstruction(OpCodes.Stfld, targetField);
+                        yield return new CodeInstruction(OpCodes.Stfld, isOutside);
                         continue;
                     }
                 }
                 yield return instruction;
             }
+            
         }
 
         /*

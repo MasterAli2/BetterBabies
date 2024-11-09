@@ -3,66 +3,82 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using BepInEx.Configuration;
+using CSync.Lib;
+using CSync.Extensions;
+using System.Runtime.Serialization;
 
 namespace BetterBabies
 {
-    internal class ConfigManager
+    internal class ConfigManager : SyncedConfig<ConfigManager>
     {
 
-        public BaseUnityPlugin Owner;
 
-        public ConfigEntry<bool> CanBabyGoOutside;
 
-        public ConfigEntry<bool> CanBabyGoIntoOrbit;
+        [DataMember] public static SyncedEntry<bool> CanBabyGoOutside;
+
+        [DataMember] public static SyncedEntry<bool> CanBabyGoIntoOrbit;
 
         //Selling
 
-        public ConfigEntry<int> BabyPriceMinInclusive;
-        public ConfigEntry<int> BabyPriceMaxExclusive;
+        [DataMember] public static SyncedEntry<bool> CanSellBaby;
+
+        [DataMember] public static SyncedEntry<int> BabyPriceMinInclusive;
+        [DataMember] public static SyncedEntry<int> BabyPriceMaxExclusive;
 
         //Debug
 
-        public ConfigEntry<bool> disableAgentOnSell;
+        public static ConfigEntry<bool> DisableAgentOnSell;
 
-        public ConfigManager(BaseUnityPlugin owner)
+        //public static ConfigEntry<int> DebugLevel;
+
+        public ConfigManager(ConfigFile configFile) : base(MyPluginInfo.PLUGIN_GUID)
         {
-            Owner = owner;
+            CSync.Lib.ConfigManager.Register(this);
 
-            CreateConfigs();
+            CreateConfigs(configFile);
+
+            
         }
 
-        public void CreateConfigs() 
+        public void CreateConfigs(ConfigFile cfg) 
         {
-            CanBabyGoOutside = Owner.Config.Bind("General",
+            CanBabyGoOutside = cfg.BindSyncedEntry("General",
                 "CanBabyGoOutside",
                 true,
                 "Can the baby go outside without crying?");
 
-            CanBabyGoIntoOrbit = Owner.Config.Bind("General",
+            CanBabyGoIntoOrbit = cfg.BindSyncedEntry("General",
                 "CanBabyGoIntoOrbit",
                 true,
                 "Can the baby go into orbit? (unstable)");
 
             //Selling
 
-            BabyPriceMinInclusive = Owner.Config.Bind("Selling",
+            BabyPriceMinInclusive = cfg.BindSyncedEntry("Selling",
                 "BabyPriceMinInclusive",
                 100,
                 "Minimum baby price when sold. (inclusive");
 
-            BabyPriceMaxExclusive = Owner.Config.Bind("Selling",
+            BabyPriceMaxExclusive = cfg.BindSyncedEntry("Selling",
                 "BabyPriceMaxExclusive",
                 150,
                 "Maximum baby price when sold. (exclusive");
 
             //Debug
 
-            disableAgentOnSell = Owner.Config.Bind("Debug",
-                "disableAgentOnSell",
+            DisableAgentOnSell = cfg.Bind("Debug",
+                "DisableAgentOnSell",
                 true,
                 "disable baby nav mesh agent on sell? toggle this on or off might fix issues regarding selling");
 
+            /*
+            DebugLevel = cfg.Bind("Debug",
+                "DebugLevel",
+                0,
+                "Currently Unused.");
+            */
         }
 
     }
+
 }

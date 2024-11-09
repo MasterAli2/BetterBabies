@@ -8,29 +8,33 @@ namespace BetterBabies.Patches
 {
     internal class BabySell
     {
+
+        // cleanup
         [HarmonyPatch(typeof(DepositItemsDesk), nameof(DepositItemsDesk.PlaceItemOnCounter))]
         [HarmonyPrefix]
-        static void disableBabyOnSell(object[] __args)
+        static bool disableBabyOnSell(object[] __args)
         {
+            if (!ConfigManager.CanSellBaby.Value) return false;
+
             PlayerControllerB _ = (PlayerControllerB)__args[0];
 
-            if (_.currentlyHeldObjectServer.GetType() != typeof(CaveDwellerAI)) return;
+            if (_.currentlyHeldObjectServer.GetType() != typeof(CaveDwellerAI)) return true;
 
 
-            CaveDwellerPhysicsProp physicsProp = ((CaveDwellerPhysicsProp)_.currentlyHeldObjectServer);
+            CaveDwellerPhysicsProp physicsProp = (CaveDwellerPhysicsProp)_.currentlyHeldObjectServer;
             CaveDwellerAI ai = physicsProp.caveDwellerScript;
 
 
             physicsProp.enabled = false;
             ai.enabled = false;
 
-            if (BetterBabies.Instance.config.disableAgentOnSell.Value) ai.agent.enabled = false;
+            if (ConfigManager.DisableAgentOnSell.Value) ai.agent.enabled = false;
 
             UnityEngine.Object.DestroyImmediate(ai);
 
             BetterBabies.Logger.LogDebug("imagine selling a baby");
 
-            return;
+            return true;
         }
 
         [HarmonyPatch(typeof(CaveDwellerPhysicsProp), nameof(CaveDwellerPhysicsProp.DiscardItem))]
