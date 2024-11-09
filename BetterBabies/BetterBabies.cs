@@ -106,6 +106,8 @@ namespace BetterBabies
             __.scrapValue = random.Next(random.Next(ConfigManager.BabyPriceMinInclusive.Value, ConfigManager.BabyPriceMaxExclusive.Value));
         }
 
+
+        #region aaa
         [HarmonyPatch(typeof(BetterBabies), nameof(BetterBabies.aaa))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> aaa_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
@@ -161,5 +163,7 @@ namespace BetterBabies
 
         [MethodImpl(MethodImplOptions.NoOptimization)]
         public static void aab() { }
+
+        #endregion
     }
 }
