@@ -38,12 +38,30 @@ namespace BetterBabies.Patches
         }
 
 
-
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.UnloadSceneObjectsEarly))]
+        [HarmonyTranspiler]
+        [HarmonyDebug]
+        static IEnumerable<CodeInstruction> DontDespawnBaby(IEnumerable<CodeInstruction> instructions, ILGenerator il)
+        {
+            bool foundLoopStart = false;
+            foreach (CodeInstruction item in instructions)
+            {
+               if (!foundLoopStart && item.opcode == OpCodes.Br_S)
+                {
+                    foundLoopStart = true;
+                    foreach (CodeInstruction item1 in BetterBabies._1x00)
+                    {
+                        yield return item1;
+                    }
+                }
+                yield return item;
+            }
+        }
 
 
         // Yes i know this is bad pratice but im not making another transpiler
-        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.UnloadSceneObjectsEarly))]
-        [HarmonyPrefix]
+        //[HarmonyPatch(typeof(RoundManager), nameof(RoundManager.UnloadSceneObjectsEarly))]
+        //[HarmonyPrefix]
         static bool DontDespawnBaby(RoundManager __instance)
         {
             if (!ConfigManager.CanBabyGoIntoOrbit.Value) return true;

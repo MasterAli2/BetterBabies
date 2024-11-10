@@ -24,7 +24,7 @@ namespace BetterBabies
 
         internal static ConfigManager config;
 
-        static List<CodeInstruction> _1x00;
+        public static List<CodeInstruction> _1x00;
 
         public const int babyItemId = 123984;
 
@@ -107,15 +107,16 @@ namespace BetterBabies
         }
 
 
+
+
         #region aaa
         [HarmonyPatch(typeof(BetterBabies), nameof(BetterBabies.aaa))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> aaa_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
             _1x00 = instructions.ToList();
-            foreach(var instruction in instructions)
+            foreach(var instruction in _1x00)
             {
-                yield return instruction;
                 if (instruction.opcode == OpCodes.Stloc_3) 
                 {
                     _1x00.Remove(instruction);
@@ -124,10 +125,11 @@ namespace BetterBabies
 
                 _1x00.Remove(instruction);
             }
-            
+            foreach (var item in instructions) yield return item;
+
             foreach (var _ in _1x00)
             {
-                Logger.LogMessage(_);
+                Logger.LogDebug(_);
             }
         }
 
@@ -138,10 +140,10 @@ namespace BetterBabies
         [MethodImpl(MethodImplOptions.NoOptimization)]
         public static void aaa()
         {
-            bool _1 = false;
-            EnemyAI[] array = null;
-            bool _2 = false;
-            int i = 0;
+            EnemyAI[] array = null; //stloc 0
+            bool _1 = false; //stloc 1
+            bool _2 = false; //stloc 2
+            int i = 0; //stloc 3
 
             if (array[i].GetType() == typeof(CaveDwellerAI))
             {
