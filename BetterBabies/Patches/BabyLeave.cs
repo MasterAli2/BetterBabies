@@ -1,5 +1,6 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
+using Steamworks.Ugc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,31 +38,111 @@ namespace BetterBabies.Patches
             wasLeaving = false;
         }
 
-
+        /*
         [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.UnloadSceneObjectsEarly))]
         [HarmonyTranspiler]
         [HarmonyDebug]
         static IEnumerable<CodeInstruction> DontDespawnBaby(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
+
+            Label skipCustomLogic = il.DefineLabel();
+
+            Label skipLoopIter = il.DefineLabel();
+
+            // CaveDwellerAI castedEnemyObj;
+            var castedEnemyObj = il.DeclareLocal(typeof(CaveDwellerAI));
+
+            var shouldBabyPersist = AccessTools.Method(typeof(BetterBabies), nameof(BetterBabies.shouldBabyPersist));
+
+            var getModInstance = AccessTools.Property(typeof(BetterBabies), nameof(BetterBabies.Instance)).GetGetMethod();
+
+            var babiesInShip = AccessTools.Field(typeof(BetterBabies), nameof(BetterBabies.babiesInShip));
+
+            var addItemToList = AccessTools.Method(typeof(List<CaveDwellerAI>), nameof(List<CaveDwellerAI>.Add));
+
+            var caveDwellerProp = AccessTools.Field(typeof(CaveDwellerAI), nameof(CaveDwellerAI.propScript));
+
+
+
             bool foundLoopStart = false;
-            foreach (CodeInstruction item in instructions)
+            bool foundLoopStart_ = false;
+
+            bool foundLoopEnd = false;
+            int timesFoundLdloc3 = 0;
+            foreach (CodeInstruction instruction in instructions)
             {
-               if (!foundLoopStart && item.opcode == OpCodes.Br_S)
+                var _ = instruction.Clone();
+
+                if (foundLoopStart_)
+                {
+                    foundLoopStart_ = false;
+                    BetterBabies.Logger.LogDebug("found skip 1");
+                    _.labels.Add(skipCustomLogic);
+                }
+                if (instruction.opcode == OpCodes.Ldloc_3)
+                {
+                    timesFoundLdloc3++;
+                    if (timesFoundLdloc3 == 4)
+                    {
+                        _.labels.Add(skipLoopIter);
+                        BetterBabies.Logger.LogDebug(instruction);
+                    }
+
+                }
+
+                yield return _;
+
+
+                if (!foundLoopStart && instruction.opcode == OpCodes.Br)
                 {
                     foundLoopStart = true;
-                    foreach (CodeInstruction item1 in BetterBabies._1x00)
-                    {
-                        yield return item1;
-                    }
+                    foundLoopStart_ = true;
+
+
+                    // if (array[num] is CaveDwellerAI)
+                    yield return new CodeInstruction(OpCodes.Ldloc_0);
+                    yield return new CodeInstruction(OpCodes.Ldloc_3);
+                    yield return new CodeInstruction(OpCodes.Ldelem_Ref);
+                    yield return new CodeInstruction(OpCodes.Isinst, typeof(CaveDwellerAI));
+                    yield return new CodeInstruction(OpCodes.Brfalse, skipCustomLogic);
+
+                    // castedEnemyObj = (CaveDwellerAI)array[num];
+                    yield return new CodeInstruction(OpCodes.Ldloc_0);
+                    yield return new CodeInstruction(OpCodes.Ldloc_3);
+                    yield return new CodeInstruction(OpCodes.Ldelem_Ref);
+                    yield return new CodeInstruction(OpCodes.Castclass, typeof(CaveDwellerAI));
+                    yield return new CodeInstruction(OpCodes.Stloc, castedEnemyObj);
+
+                    // if (shouldBabyPersist(castedEnemyObj))
+                    yield return new CodeInstruction(OpCodes.Ldloc, castedEnemyObj);
+                    yield return new CodeInstruction(OpCodes.Call, shouldBabyPersist);
+                    yield return new CodeInstruction(OpCodes.Brfalse, skipCustomLogic);
+
+                    // Instance.babiesInShip.Add(casyedEnemyObj);
+                    yield return new CodeInstruction(OpCodes.Call, getModInstance);
+                    yield return new CodeInstruction(OpCodes.Ldfld, babiesInShip);
+                    yield return new CodeInstruction(OpCodes.Ldloc, castedEnemyObj);
+                    yield return new CodeInstruction(OpCodes.Callvirt, addItemToList);
+
+                    // Instance.babyItemsInShip.Add(castedEnemyObj.propScript);
+                    yield return new CodeInstruction(OpCodes.Call, getModInstance);
+                    yield return new CodeInstruction(OpCodes.Ldfld, babiesInShip);
+                    yield return new CodeInstruction(OpCodes.Ldloc, castedEnemyObj);
+                    yield return new CodeInstruction(OpCodes.Ldfld, caveDwellerProp);
+                    yield return new CodeInstruction(OpCodes.Callvirt, addItemToList);
+
+                    // continue;
+                    yield return new CodeInstruction(OpCodes.Br, skipLoopIter);
+
                 }
-                yield return item;
             }
         }
-
+        */
 
         // Yes i know this is bad pratice but im not making another transpiler
-        //[HarmonyPatch(typeof(RoundManager), nameof(RoundManager.UnloadSceneObjectsEarly))]
-        //[HarmonyPrefix]
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.UnloadSceneObjectsEarly))]
+        [HarmonyPrefix]
+        
         static bool DontDespawnBaby(RoundManager __instance)
         {
             if (!ConfigManager.CanBabyGoIntoOrbit.Value) return true;
@@ -81,7 +162,7 @@ namespace BetterBabies.Patches
                     CaveDwellerAI _ = (CaveDwellerAI)array[i];
                     BetterBabies.Logger.LogDebug($"Found a wild baby!");
 
-                    if (_.propScript.isHeld && _.propScript.playerHeldBy.isInHangarShipRoom)
+                    if (BetterBabies.shouldBabyPersist(_))
                     {
                         BetterBabies.Logger.LogDebug($"Kidnaping the wild baby!");
 
@@ -163,7 +244,6 @@ namespace BetterBabies.Patches
 
             if (BetterBabies.babyInShipState(__instance))
             {
-                if (__instance.growthMeter == 0 || !__instance.babyCrying) return true;
 
                 __instance.SetCryingLocalClient(false);
                 __instance.SetBabyCryingServerRpc(false);

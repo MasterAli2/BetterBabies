@@ -6,6 +6,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 
@@ -24,7 +25,7 @@ namespace BetterBabies
 
         internal static ConfigManager config;
 
-        public static List<CodeInstruction> _1x00;
+
 
         public const int babyItemId = 123984;
 
@@ -51,7 +52,7 @@ namespace BetterBabies
 
             Logger.LogDebug("Patching...");
 
-            Harmony.PatchAll(typeof(BetterBabies));
+            //Harmony.PatchAll(typeof(BetterBabies));
 
             Harmony.PatchAll(typeof(BabyOutside));
 
@@ -90,9 +91,7 @@ namespace BetterBabies
 
         public static bool babyInShipState(CaveDwellerAI __)
         {
-            if (Instance.babiesInShip.Contains(__) ||
-                !StartOfRound.Instance.shipHasLanded
-                || StartOfRound.Instance.inShipPhase)
+            if (Instance.babiesInShip.Contains(__))
             {
                 return true;
             }
@@ -107,15 +106,23 @@ namespace BetterBabies
         }
 
 
+        public static bool shouldBabyPersist(CaveDwellerAI _)
+        {
+            if (_.propScript.isHeld && _.propScript.playerHeldBy.isInHangarShipRoom && _.currentBehaviourStateIndex == 0) return true;
+            return false;
+        }
 
 
+       
+        
         #region aaa
+        /*
         [HarmonyPatch(typeof(BetterBabies), nameof(BetterBabies.aaa))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> aaa_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
             _1x00 = instructions.ToList();
-            foreach(var instruction in _1x00)
+            foreach(CodeInstruction instruction in instructions)
             {
                 if (instruction.opcode == OpCodes.Stloc_3) 
                 {
@@ -125,17 +132,12 @@ namespace BetterBabies
 
                 _1x00.Remove(instruction);
             }
-            foreach (var item in instructions) yield return item;
-
-            foreach (var _ in _1x00)
-            {
-                Logger.LogDebug(_);
-            }
+            yield break;
         }
 
         [HarmonyPatch(typeof(BetterBabies), nameof(BetterBabies.aaa))]
         [HarmonyFinalizer]
-        static Exception aaa_Finalizer() { return null; }
+        static Exception aaa_Finalizer() { return null; }*/
 
         [MethodImpl(MethodImplOptions.NoOptimization)]
         public static void aaa()
@@ -145,14 +147,12 @@ namespace BetterBabies
             bool _2 = false; //stloc 2
             int i = 0; //stloc 3
 
-            if (array[i].GetType() == typeof(CaveDwellerAI))
+            if (array[i] is CaveDwellerAI)
             {
                 CaveDwellerAI _ = (CaveDwellerAI)array[i];
-                BetterBabies.Logger.LogDebug($"Found a wild baby!");
 
-                if (_.propScript.isHeld && _.propScript.playerHeldBy.isInHangarShipRoom)
+                if (shouldBabyPersist(_))
                 {
-                    BetterBabies.Logger.LogDebug($"Kidnaping the wild baby!");
 
                     BetterBabies.Instance.babiesInShip.Add(_);
                     
