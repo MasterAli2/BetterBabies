@@ -16,7 +16,7 @@ namespace BetterBabies
 {
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     [BepInDependency("dev.kittenji.NavMeshInCompany", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("com.sigurd.csync", "5.0.1")]
+    [BepInDependency("com.sigurd.csync", BepInDependency.DependencyFlags.HardDependency)]
     public class BetterBabies : BaseUnityPlugin
     {
         public static BetterBabies Instance { get; private set; } = null!;
