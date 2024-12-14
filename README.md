@@ -28,6 +28,14 @@ This mod provides the following features:
 - May cause desync of baby price (if credits or enemy index is desynced across clients)
 
 
+## Config
+also it has a few config options
+
+- Baby can go outside
+- Baby can go into orbit
+- Baby can be sold
+- Baby price
+
 ## Notice
 Please note that this mod was not fully in multiplayer tested and may cause issues.
 
