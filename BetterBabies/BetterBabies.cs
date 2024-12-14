@@ -100,9 +100,10 @@ namespace BetterBabies
         
         public static void setBabyPrice(CaveDwellerPhysicsProp __)
         {
-            System.Random random = new System.Random(StartOfRound.Instance.randomMapSeed);
+            System.Random random = new System.Random((__.caveDwellerScript.thisEnemyIndex + 1) * UnityEngine.Object.FindObjectOfType<Terminal>().groupCredits + babyItemId); ;
 
-            __.scrapValue = random.Next(random.Next(ConfigManager.BabyPriceMinInclusive.Value, ConfigManager.BabyPriceMaxExclusive.Value));
+            __.scrapValue = random.Next(ConfigManager.BabyPriceMinInclusive.Value, ConfigManager.BabyPriceMaxExclusive.Value);
+            __.itemProperties.isScrap = true;
         }
 
 

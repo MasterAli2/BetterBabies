@@ -54,6 +54,11 @@ namespace BetterBabies
 
             //Selling
 
+            CanSellBaby = cfg.BindSyncedEntry("Selling",
+                "CanSellBaby",
+                true,
+                "Can the Baby be sold at the company");
+
             BabyPriceMinInclusive = cfg.BindSyncedEntry("Selling",
                 "BabyPriceMinInclusive",
                 100,

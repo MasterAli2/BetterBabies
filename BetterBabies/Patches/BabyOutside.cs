@@ -14,9 +14,9 @@ namespace BetterBabies.Patches
     internal class BabyOutside
     {
 
+
         [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.BabyUpdate))]
         [HarmonyTranspiler]
-       // [HarmonyDebug]
         static IEnumerable<CodeInstruction> BabyOutsideTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
 

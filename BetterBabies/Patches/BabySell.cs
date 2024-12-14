@@ -14,25 +14,26 @@ namespace BetterBabies.Patches
         [HarmonyPrefix]
         static bool disableBabyOnSell(object[] __args)
         {
+
+            PlayerControllerB player = (PlayerControllerB)__args[0];
+
+            if (player.currentlyHeldObjectServer.GetType() != typeof(CaveDwellerPhysicsProp)) return true;
             if (!ConfigManager.CanSellBaby.Value) return false;
 
-            PlayerControllerB _ = (PlayerControllerB)__args[0];
 
-            if (_.currentlyHeldObjectServer.GetType() != typeof(CaveDwellerAI)) return true;
+            CaveDwellerPhysicsProp caveDwellerPhysicsProp = (CaveDwellerPhysicsProp)player.currentlyHeldObjectServer;
+            CaveDwellerAI caveDwellerAI = caveDwellerPhysicsProp.caveDwellerScript;
 
+            BetterBabies.setBabyPrice(caveDwellerPhysicsProp);
 
-            CaveDwellerPhysicsProp physicsProp = (CaveDwellerPhysicsProp)_.currentlyHeldObjectServer;
-            CaveDwellerAI ai = physicsProp.caveDwellerScript;
+            caveDwellerPhysicsProp.enabled = false;
 
+            caveDwellerAI.enabled = false;
+            caveDwellerAI.agent.enabled = false;
 
-            physicsProp.enabled = false;
-            ai.enabled = false;
+            // messes up Networking
+            //UnityEngine.Object.DestroyImmediate(ai);
 
-            if (ConfigManager.DisableAgentOnSell.Value) ai.agent.enabled = false;
-
-            UnityEngine.Object.DestroyImmediate(ai);
-
-            BetterBabies.Logger.LogDebug("imagine selling a baby");
 
             return true;
         }
@@ -42,13 +43,6 @@ namespace BetterBabies.Patches
         static Exception babySellErrorHandle() { return null; }
 
 
-        [HarmonyPatch(typeof(CaveDwellerPhysicsProp), nameof(CaveDwellerPhysicsProp.Start))]
-        [HarmonyPrefix]
-        static void setBabyPrice(CaveDwellerPhysicsProp __instance)
-        {
-            __instance.itemProperties.isScrap = true;
-            BetterBabies.setBabyPrice(__instance);
-        }
 
 
 
