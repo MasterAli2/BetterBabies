@@ -247,6 +247,7 @@ namespace BetterBabies.Patches
 
                 __instance.SetCryingLocalClient(false);
                 __instance.SetBabyCryingServerRpc(false);
+                __instance.SetBabyRunningServerRpc(false);
 
                 __instance.growthMeter = 0f;
                 return false;
