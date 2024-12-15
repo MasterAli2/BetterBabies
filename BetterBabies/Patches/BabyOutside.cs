@@ -20,13 +20,20 @@ namespace BetterBabies.Patches
         [HarmonyPrefix]
         static void babyOutsidePrefix(CaveDwellerAI __instance)
         {
+            if (!ConfigManager.CanBabyGoOutside) return;
+
             wasOutside = __instance.isOutside;
             __instance.isOutside = false;
         }
 
         [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.BabyUpdate))]
         [HarmonyPostfix]
-        static void babyOutsidePostfix(CaveDwellerAI __instance) => __instance.isOutside = wasOutside;
+        static void babyOutsidePostfix(CaveDwellerAI __instance)
+        {
+            if (!ConfigManager.CanBabyGoOutside) return;
+
+            __instance.isOutside = wasOutside;
+        }
 
 
 
