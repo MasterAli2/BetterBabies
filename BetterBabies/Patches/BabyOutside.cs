@@ -13,8 +13,24 @@ namespace BetterBabies.Patches
 {
     internal class BabyOutside
     {
+        static bool wasOutside;
 
 
+        [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.BabyUpdate))]
+        [HarmonyPrefix]
+        static void babyOutsidePrefix(CaveDwellerAI __instance)
+        {
+            wasOutside = __instance.isOutside;
+            __instance.isOutside = false;
+        }
+
+        [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.BabyUpdate))]
+        [HarmonyPostfix]
+        static void babyOutsidePostfix(CaveDwellerAI __instance) => __instance.isOutside = wasOutside;
+
+
+
+        /*
         [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.BabyUpdate))]
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> BabyOutsideTranspiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
@@ -92,7 +108,7 @@ namespace BetterBabies.Patches
             }
             
         }
-
+        */
         /*
         [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.UnloadSceneObjectsEarly))]
         [HarmonyTranspiler]
