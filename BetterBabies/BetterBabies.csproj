@@ -66,6 +66,6 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="xcopy /y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Ali\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\betterBabiesDev\BepInEx\plugins\MasterAli2.BetterBabies\&quot;&#xD;&#xA;" />
+      <Exec Command="echo xcopy /y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Ali\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\betterBabiesDev\BepInEx\plugins\MasterAli2.BetterBabies\&quot;&#xD;&#xA;" />
     </Target>
 </Project>
