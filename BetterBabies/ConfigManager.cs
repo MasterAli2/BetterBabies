@@ -9,23 +9,23 @@ using System.Runtime.Serialization;
 
 namespace BetterBabies
 {
-    internal class ConfigManager : SyncedConfig<ConfigManager>
+    internal class ConfigManager : SyncedConfig2<ConfigManager>
     {
 
 
 
-        [DataMember] public static SyncedEntry<bool> CanBabyGoOutside;
+        [SyncedEntryField] public static SyncedEntry<bool> CanBabyGoOutside;
 
-        [DataMember] public static SyncedEntry<bool> CanBabyGoIntoOrbit;
+        [SyncedEntryField] public static SyncedEntry<bool> CanBabyGoIntoOrbit;
 
         //Selling
 
-        [DataMember] public static SyncedEntry<bool> CanSellBaby;
+        //Selling
 
-        [DataMember] public static SyncedEntry<int> BabyPriceMinInclusive;
-        [DataMember] public static SyncedEntry<int> BabyPriceMaxExclusive;
+        [SyncedEntryField] public static SyncedEntry<bool> CanSellBaby;
 
-        //Debug
+        [SyncedEntryField] public static SyncedEntry<int> BabyPriceMinInclusive;
+        [SyncedEntryField] public static SyncedEntry<int> BabyPriceMaxExclusive;
 
         public static ConfigEntry<bool> DisableAgentOnSell;
 
@@ -33,11 +33,11 @@ namespace BetterBabies
 
         public ConfigManager(ConfigFile configFile) : base(MyPluginInfo.PLUGIN_GUID)
         {
-            CSync.Lib.ConfigManager.Register(this);
+            
 
             CreateConfigs(configFile);
 
-            
+            CSync.Lib.ConfigManager.Register(this);
         }
 
         public void CreateConfigs(ConfigFile cfg) 
