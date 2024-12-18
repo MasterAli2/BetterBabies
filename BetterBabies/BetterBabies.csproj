@@ -64,4 +64,8 @@
         <HintPath>E:\appdata\r2modmanPlus-local\LethalCompany\profiles\ModDev2\BepInEx\plugins\Sigurd-CSync\CSync\com.sigurd.csync.dll</HintPath>
       </Reference>
     </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="xcopy /y &quot;$(TargetDir)$(TargetFileName)&quot; &quot;C:\Users\Ali\AppData\Roaming\com.kesomannen.gale\lethal-company\profiles\betterBabiesDev\BepInEx\plugins\MasterAli2.BetterBabies\&quot;&#xD;&#xA;" />
+    </Target>
 </Project>
