@@ -16,14 +16,14 @@ namespace BetterBabies.Patches
         [HarmonyPrefix]
         static bool DisableTransformOfBaby(CaveDwellerAI __instance)
         {
-            if (false) return false;
-
             if (BetterBabies.babyInShipState(__instance)) return false;
 
             DepositItemsDesk companyDesk = UnityEngine.Object.FindObjectOfType<DepositItemsDesk>();
 
-            if (companyDesk == null) return true;
-            if (companyDesk.itemsOnCounter.Contains(__instance.propScript)) return false;
+            if (companyDesk is not null && companyDesk.itemsOnCounter.Contains(__instance.propScript)) return false;
+
+            if (!ConfigManager.CanBabyGrowUp.Value) return false;
+        
 
             return true;
         }
@@ -103,16 +103,6 @@ namespace BetterBabies.Patches
         {
             BetterBabies.Logger.LogDebug("Updating baby inventory state");
             BetterBabies.Instance.babyInInventory(__instance);
-        }
-
-
-        [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.TransformIntoAdult))]
-        [HarmonyPrefix]
-        static bool babyTransformPrefix()
-        {
-            if (!ConfigManager.CanBabyGrowUp.Value) return false;
-
-            return true;
         }
 
         [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.IncreaseBabyGrowthMeter))]
