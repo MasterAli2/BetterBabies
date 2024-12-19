@@ -107,7 +107,7 @@ namespace BetterBabies.Patches
 
         [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.IncreaseBabyGrowthMeter))]
         [HarmonyPostfix]
-        static void babyCryPostfix(CaveDwellerAI __instance)
+        static void babyGrowPostfix(CaveDwellerAI __instance)
         {
             if (ConfigManager.CanBabyGrowUp.Value) return;
             
