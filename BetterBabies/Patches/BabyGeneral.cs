@@ -105,5 +105,24 @@ namespace BetterBabies.Patches
             BetterBabies.Instance.babyInInventory(__instance);
         }
 
+
+        [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.TransformIntoAdult))]
+        [HarmonyPrefix]
+        static bool babyTransformPrefix()
+        {
+            if (!ConfigManager.CanBabyGrowUp.Value) return false;
+
+            return true;
+        }
+
+        [HarmonyPatch(typeof(CaveDwellerAI), nameof(CaveDwellerAI.IncreaseBabyGrowthMeter))]
+        [HarmonyPostfix]
+        static void babyCryPostfix(CaveDwellerAI __instance)
+        {
+            if (ConfigManager.CanBabyGrowUp.Value) return;
+            
+            __instance.growthMeter = 0f;
+            __instance.nearTransforming = false;
+        }
     }
 }

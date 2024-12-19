@@ -18,7 +18,7 @@ namespace BetterBabies
 
         [SyncedEntryField] public static SyncedEntry<bool> CanBabyGoIntoOrbit;
 
-        //Selling
+        [SyncedEntryField] public static SyncedEntry<bool> CanBabyGrowUp;
 
         //Selling
 
@@ -27,7 +27,6 @@ namespace BetterBabies
         [SyncedEntryField] public static SyncedEntry<int> BabyPriceMinInclusive;
         [SyncedEntryField] public static SyncedEntry<int> BabyPriceMaxExclusive;
 
-        public static ConfigEntry<bool> DisableAgentOnSell;
 
         //public static ConfigEntry<int> DebugLevel;
 
@@ -52,6 +51,11 @@ namespace BetterBabies
                 true,
                 "Can the baby go into orbit? (unstable)");
 
+            CanBabyGrowUp = cfg.BindSyncedEntry("General",
+                "CanBabyGrowUp",
+                true,
+                "Can the baby become an adult?");
+
             //Selling
 
             CanSellBaby = cfg.BindSyncedEntry("Selling",
@@ -68,20 +72,6 @@ namespace BetterBabies
                 "BabyPriceMaxExclusive",
                 150,
                 "Maximum baby price when sold. (exclusive");
-
-            //Debug
-
-            DisableAgentOnSell = cfg.Bind("Debug",
-                "DisableAgentOnSell",
-                true,
-                "disable baby nav mesh agent on sell? toggle this on or off might fix issues regarding selling");
-
-            /*
-            DebugLevel = cfg.Bind("Debug",
-                "DebugLevel",
-                0,
-                "Currently Unused.");
-            */
         }
 
     }
