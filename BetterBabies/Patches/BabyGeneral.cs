@@ -109,10 +109,13 @@ namespace BetterBabies.Patches
         [HarmonyPostfix]
         static void babyGrowPostfix(CaveDwellerAI __instance)
         {
-            if (ConfigManager.CanBabyGrowUp.Value) return;
+            if (!ConfigManager.CanBabyGrowUp.Value)
+            {
+                __instance.growthMeter = 0f;
+                __instance.nearTransforming = false;
+            }
             
-            __instance.growthMeter = 0f;
-            __instance.nearTransforming = false;
+            
         }
     }
 }
