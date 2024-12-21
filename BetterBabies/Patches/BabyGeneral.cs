@@ -118,7 +118,7 @@ namespace BetterBabies.Patches
                 baby.nearTransforming = false;
             }
 
-            if (ConfigManager.DecreaseBabyGrowthMeter && !baby.babyCrying && !baby.nearTransforming)
+            if (ConfigManager.DecreaseBabyGrowthMeter.Value && !baby.babyCrying && !baby.nearTransforming)
             {
                 baby.growthMeter = Mathf.Clamp((float)(baby.growthMeter - ConfigManager.BabyGrowthMeterDecreasePersecond * Time.deltaTime), 0f, 25f);
             }
