@@ -3,6 +3,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace BetterBabies.Patches
 {
@@ -109,13 +110,19 @@ namespace BetterBabies.Patches
         [HarmonyPostfix]
         static void babyGrowPostfix(CaveDwellerAI __instance)
         {
+            CaveDwellerAI baby = __instance;
+
             if (!ConfigManager.CanBabyGrowUp.Value)
             {
-                __instance.growthMeter = 0f;
-                __instance.nearTransforming = false;
+                baby.growthMeter = 0f;
+                baby.nearTransforming = false;
             }
-            
-            
+
+            if (ConfigManager.DecreaseBabyGrowthMeter && !baby.babyCrying && !baby.nearTransforming)
+            {
+                baby.growthMeter = Mathf.Clamp((float)(baby.growthMeter - ConfigManager.BabyGrowthMeterDecreasePersecond * Time.deltaTime), 0f, 25f);
+            }
+            //BetterBabies.Logger.LogDebug($"Growth Meter: {baby.growthMeter}");
         }
     }
 }

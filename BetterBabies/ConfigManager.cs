@@ -27,6 +27,12 @@ namespace BetterBabies
         [SyncedEntryField] public static SyncedEntry<int> BabyPriceMinInclusive;
         [SyncedEntryField] public static SyncedEntry<int> BabyPriceMaxExclusive;
 
+        // AI
+
+        [SyncedEntryField] public static SyncedEntry<bool> DecreaseBabyGrowthMeter;
+
+        [SyncedEntryField] public static SyncedEntry<float> BabyGrowthMeterDecreasePersecond;
+
 
         //public static ConfigEntry<int> DebugLevel;
 
@@ -72,6 +78,18 @@ namespace BetterBabies
                 "BabyPriceMaxExclusive",
                 150,
                 "Maximum baby price when sold. (exclusive");
+
+            //AI
+
+            DecreaseBabyGrowthMeter = cfg.BindSyncedEntry("AI",
+                "DecreaseBabyGrowthMeter",
+                true,
+                "Should the baby growth meter slowly decrease over time");
+
+            BabyGrowthMeterDecreasePersecond = cfg.BindSyncedEntry("AI",
+                "BabyGrowthMeterDecreasePersecond",
+                0.035f,
+                "Decreased baby growth meter per second");
         }
 
     }
